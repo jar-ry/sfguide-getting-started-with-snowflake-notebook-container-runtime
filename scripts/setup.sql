@@ -1,3 +1,4 @@
+ALTER SESSION SET query_tag = '{"origin":"sf_sit-is", "name":"aiml_notebooks_container_runtime", "version":{"major":1, "minor":0}, "attributes":{"is_quickstart":1, "source":"sql"}}';
 USE ROLE accountadmin;
 CREATE OR REPLACE DATABASE container_runtime_lab;
 CREATE SCHEMA notebooks;
@@ -53,3 +54,30 @@ CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION pypi_access_integration
 
 GRANT USAGE ON INTEGRATION allow_all_integration TO ROLE container_runtime_lab_user;
 GRANT USAGE ON INTEGRATION pypi_access_integration TO ROLE container_runtime_lab_user;
+
+USE ROLE container_runtime_lab_user;
+
+CREATE FILE FORMAT IF NOT EXISTS container_runtime_lab.notebooks.csvformat 
+    SKIP_HEADER = 1 
+    TYPE = 'CSV';
+
+-- create external stage with the csv format to stage the diamonds dataset
+CREATE STAGE IF NOT EXISTS container_runtime_lab.notebooks.diamond_assets 
+    FILE_FORMAT = container_runtime_lab.notebooks.csvformat 
+    URL = 's3://sfquickstarts/intro-to-machine-learning-with-snowpark-ml-for-python/diamonds.csv';
+
+CREATE OR REPLACE TABLE CONTAINER_RUNTIME_LAB.NOTEBOOKS.DIAMONDS (
+	CARAT NUMBER(38,2),
+	CUT VARCHAR(16777216),
+	COLOR VARCHAR(16777216),
+	CLARITY VARCHAR(16777216),
+	DEPTH NUMBER(38,1),
+	"TABLE" NUMBER(38,1),
+	PRICE NUMBER(38,0),
+	X NUMBER(38,2),
+	Y NUMBER(38,2),
+	Z NUMBER(38,2)
+);
+
+COPY INTO CONTAINER_RUNTIME_LAB.NOTEBOOKS.DIAMONDS
+FROM @CONTAINER_RUNTIME_LAB.NOTEBOOKS.DIAMOND_ASSETS;
