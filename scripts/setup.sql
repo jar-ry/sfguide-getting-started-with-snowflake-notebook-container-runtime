@@ -4,7 +4,10 @@ CREATE OR REPLACE DATABASE container_runtime_lab;
 CREATE SCHEMA notebooks;
 
 CREATE OR REPLACE ROLE container_runtime_lab_user;
-GRANT ROLE container_runtime_lab_user to USER <YOUR_USER>;
+BEGIN
+    LET current_user_name := CURRENT_USER();
+    EXECUTE IMMEDIATE 'GRANT ROLE container_runtime_lab_user TO USER ' || current_user_name;
+END;
 
 GRANT USAGE ON DATABASE container_runtime_lab TO ROLE container_runtime_lab_user;
 GRANT ALL ON SCHEMA container_runtime_lab.notebooks TO ROLE container_runtime_lab_user;
